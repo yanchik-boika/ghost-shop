@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign in</title>
+    <link rel="stylesheet" href="{% static 'css/form-styles.css' %}">
+</head>
+<body>
+
+<div class="auth-container">
+    <div class="auth-box">
+        <h2>Sign in</h2>
+
+         {% if form.errors %}
+            <div class="form-errors">
+                {{ form.non_field_errors }}
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        {{ error }}<br>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            {% for field in form %}
+                <div class="form-row">
+                    {{ field.label_tag }}
+                    {{ field }}
+                </div>
+            {% endfor %}
+
+            <p>Don't have an account?<a href="{% url 'register' %}">Sign up</a></p>
+
+            <button type="submit">Sign in</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

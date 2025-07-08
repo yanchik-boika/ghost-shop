@@ -1,0 +1,113 @@
+.navbar {
+    background-color: #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: #000000 !important;
+}
+
+.navbar-nav .nav-link {
+    color: #4b5563;
+    margin-right: 10px;
+    transition: color 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+    color: #000000;
+}
+
+.dropdown-menu .dropdown-item {
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.dropdown-menu .dropdown-item:hover {
+    background-color: #f3f4f6;
+    color: #374151;
+}
+
+.btn-outline-primary {
+    border-color: #000;
+    color: #000;
+    transition: all 0.2s ease;
+}
+
+.btn-outline-primary:hover {
+    background-color: #000;
+    color: #fff;
+    border-color: #000;
+}
+
+.nav-link.dropdown-toggle svg {
+    transition: transform 0.3s ease;
+}
+
+.nav-link.dropdown-toggle[aria-expanded="true"] svg {
+    transform: rotate(180deg);
+}
+
+.navigateKir {
+    flex-direction: column;
+}
+
+.nav-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+    text-decoration: none;
+}
+
+.nav-icon:hover {
+    background-color: #f3f4f6;
+}
+
+.dropdown-menu {
+    min-width: 160px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    padding: 8px 0;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    font-size: 14px;
+}
+
+.dropdown-menu .dropdown-item {
+    padding: 8px 16px;
+    color: #374151;
+    transition: background-color 0.2s ease;
+}
+
+.dropdown-menu .dropdown-item:hover {
+    background-color: #f3f4f6;
+    color: #111827;
+}
+
+.dropdown-item {
+    position: relative;
+}
+
+.dropdown-item img {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+
+
+
+@media (max-width: 768px) {
+    .navbar-nav {
+        text-align: center;
+    }
+
+    .navbar-nav .nav-item {
+        margin-bottom: 8px;
+    }
+}
+
