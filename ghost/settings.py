@@ -1,6 +1,7 @@
 from pathlib import Path
 import environ
 
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = "django-insecure-h%4$x$1k*=o3smhb$h5(h%%!4v3k&=kvmdg#6bms3w&dnd6fxk"
@@ -16,8 +17,19 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'shop.apps.ShopConfig',
+    # 'shop.apps.ShopConfig',
+    'shop',
+    'cloudinary',
+    'cloudinary_storage'
 ]
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'dzrhl5r1f',
+    'API_KEY': '711177564269367',
+    'API_SECRET': 'EJnjCRR_0JSfG1B354MfxyGddwg'
+}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

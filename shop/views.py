@@ -1,16 +1,14 @@
+from enum import unique
+
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from .forms import RegisterForm, LoginForm
+from django.shortcuts import render, get_object_or_404
+from django.db.models import Prefetch
+from .models import Brand, Category, Product, ProductVariant, ProductImage
 
 def home(request):
     return render(request, 'ghost/home.html')
-
-
-def nike_men(request):
-    return render(request, 'nike-men.html')
-
-def nike_women(request):
-    return render(request, 'nike-women.html')
 
 
 def register_view(request):
@@ -39,6 +37,58 @@ def login_view(request):
     return render(request, 'ghost/login.html', {'form': form})
 
 
+
+
 def logout_view(request):
     logout(request)
     return redirect('home')
+
+
+
+
+def filtered_products(request, brand, category):
+    brand_obj = get_object_or_404(Brand, name__iexact=brand)
+    category_obj = get_object_or_404(Category, slug__iexact=category)
+
+    products = Product.objects.filter(brand=brand_obj, category=category_obj)
+
+    products_filtered = []
+    name_counts = {}
+
+    for product in products:
+        name = product.name
+        count = name_counts.get(name, 0)
+
+        if count < 2:
+            products_filtered.append(product)
+            name_counts[name] = count + 1
+
+
+    context = {
+        'brand': brand_obj,
+        'category': category_obj,
+        'products': products_filtered[:9]
+    }
+    return render(request, 'ghost/products.html', context)
+
+
+
+
+
+
+def product_detail(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    current_color = product.color
+
+    images = ProductImage.objects.filter(product=product, color=current_color)
+
+    family = Product.objects.filter(name=product.name, category=product.category).exclude(pk=product.pk)
+
+    sizes = product.variants.values_list('size__label', flat=True).distinct()
+
+    return render(request, 'ghost/product_detail.html', {
+        'product': product,
+        'images': images,
+        'sizes': sizes,
+        'product_family': family
+    })

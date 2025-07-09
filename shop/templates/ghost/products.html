@@ -1,0 +1,33 @@
+{% extends "ghost/base.html" %}
+{% block title %}{{ brand.name }} {{ category.name }} Sneakers{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">{{ brand.name }} {{ category.name }} Sneakers</h2>
+    <div class="row">
+        {% for product in products %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <img src="{{ product.main_image_url }}" class="card-img-top" alt="{{ product.name }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">${{ product.price }}</p>
+                    <a href="{% url 'product_detail' product.id %}" class="btn btn-outline-dark">Buy</a>
+                    <form method="POST" action="#" class="mt-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                            <img src="https://res.cloudinary.com/dzrhl5r1f/image/upload/v1751970523/heart_vglej6.svg"
+                                 alt="Wishlist" width="22" height="22">
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if products|length == 0 %}
+    <p class="text-center text-muted mt-5">There are no products available in this category.</p>
+    {% endif %}
+</div>
+{% endblock %}
