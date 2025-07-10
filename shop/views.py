@@ -1,11 +1,12 @@
 from enum import unique
-
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from .forms import RegisterForm, LoginForm
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Prefetch
-from .models import Brand, Category, Product, ProductVariant, ProductImage
+from .models import Brand, Category, Product, ProductVariant, ProductImage, WishlistItem
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 
 def home(request):
     return render(request, 'ghost/home.html')
@@ -59,7 +60,7 @@ def filtered_products(request, brand, category):
         name = product.name
         count = name_counts.get(name, 0)
 
-        if count < 2:
+        if count < 3:
             products_filtered.append(product)
             name_counts[name] = count + 1
 
@@ -67,7 +68,7 @@ def filtered_products(request, brand, category):
     context = {
         'brand': brand_obj,
         'category': category_obj,
-        'products': products_filtered[:9]
+        'products': products_filtered[:12]
     }
     return render(request, 'ghost/products.html', context)
 
@@ -92,3 +93,15 @@ def product_detail(request, pk):
         'sizes': sizes,
         'product_family': family
     })
+
+
+@login_required
+def add_to_wishlist(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    WishlistItem.objects.get_or_create(user=request.user, product=product)
+    return redirect(request.META.get('HTTP_REFERER', 'home'))
+
+@login_required
+def wishlist_view(request):
+    wishlist_items = WishlistItem.objects.filter(user=request.user).select_related('product')
+    return render(request, 'ghost/wishlist.html', {'wishlist_items': wishlist_items})

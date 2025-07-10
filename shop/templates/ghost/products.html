@@ -1,7 +1,8 @@
 {% extends "ghost/base.html" %}
 {% block title %}{{ brand.name }} {{ category.name }} Sneakers{% endblock %}
-
+{% load static %}
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/products-styles.css' %}">
 <div class="container mt-5">
     <h2 class="mb-4 text-center">{{ brand.name }} {{ category.name }} Sneakers</h2>
     <div class="row">
@@ -9,18 +10,38 @@
         <div class="col-md-4 mb-4">
             <div class="card h-100 shadow-sm">
                 <img src="{{ product.main_image_url }}" class="card-img-top" alt="{{ product.name }}">
+
                 <div class="card-body">
-                    <h5 class="card-title">{{ product.name }}</h5>
+                    <a href="{% url 'product_detail' product.id %}" class="product-title-link">
+                        <h5 class="card-title mb-2">{{ product.name }}</h5>
+                    </a>
                     <p class="card-text">${{ product.price }}</p>
-                    <a href="{% url 'product_detail' product.id %}" class="btn btn-outline-dark">Buy</a>
-                    <form method="POST" action="#" class="mt-2">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                            <img src="https://res.cloudinary.com/dzrhl5r1f/image/upload/v1751970523/heart_vglej6.svg"
-                                 alt="Wishlist" width="22" height="22">
-                        </button>
-                    </form>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="{% url 'product_detail' product.id %}" class="btn buy-btn">
+                            Buy
+                        </a>
+
+
+                        {% if user.is_authenticated %}
+                        <form method="POST" action="{% url 'add_to_wishlist' product.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn wishlist-btn">
+                               <img src="https://res.cloudinary.com/dzrhl5r1f/image/upload/v1751970523/heart_vglej6.svg"
+                                     alt="Wishlist" width="22" height="22">
+                            </button>
+                        </form>
+                        {% else %}
+                        <a href="{% url 'login' %}?next={% url 'product_detail' product.id %}" class="btn wishlist-btn">
+                           <img src="https://res.cloudinary.com/dzrhl5r1f/image/upload/v1751970523/heart_vglej6.svg"
+                                     alt="Wishlist" width="22" height="22">
+                        </a>
+                        {% endif %}
+
+                    </div>
                 </div>
+
+
             </div>
         </div>
         {% endfor %}

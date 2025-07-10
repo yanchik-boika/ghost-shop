@@ -16,6 +16,10 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
 
     path('product/<int:pk>/', views.product_detail, name='product_detail'),
+
+    path('wishlist/add/<int:product_id>/', views.add_to_wishlist, name='add_to_wishlist'),
+    path('wishlist/', views.wishlist_view, name='wishlist'),
+
     path('<str:brand>/<str:category>/', views.filtered_products, name='filtered-products'),
 ]
 
