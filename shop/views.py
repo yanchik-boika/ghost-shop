@@ -7,6 +7,11 @@ from django.db.models import Prefetch
 from .models import Brand, Category, Product, ProductVariant, ProductImage, WishlistItem
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
+from django.contrib.auth.forms import PasswordChangeForm
+from .models import CartItem, Address
+from django.contrib.auth import update_session_auth_hash
+import re
+
 
 def home(request):
     return render(request, 'ghost/home.html')
@@ -26,6 +31,7 @@ def register_view(request):
 
 from django.contrib.auth import authenticate, login
 
+
 def login_view(request):
     if request.method == "POST":
         form = LoginForm(request, data=request.POST)
@@ -38,13 +44,103 @@ def login_view(request):
     return render(request, 'ghost/login.html', {'form': form})
 
 
-
-
 def logout_view(request):
     logout(request)
     return redirect('home')
 
 
+def personal_info_view(request):
+    user = request.user
+    addresses = Address.objects.filter(user=user)
+    return render(request, 'ghost/personal_info.html', {
+        'user': user,
+        'addresses': addresses
+    })
+
+
+def add_address(request):
+    is_default = request.POST.get('is_default') == 'on'
+
+    if is_default:
+        Address.objects.filter(user=request.user, is_default=True).update(is_default=False)
+
+    Address.objects.create(
+        user=request.user,
+        full_name=request.POST.get('full_name'),
+        phone=request.POST.get('phone'),
+        street=request.POST.get('street'),
+        city=request.POST.get('city'),
+        postal_code=request.POST.get('postal_code'),
+        country=request.POST.get('country'),
+        is_default=is_default
+    )
+    return redirect('personal_info')
+
+
+def edit_address(request, address_id):
+    address = get_object_or_404(Address, id=address_id, user=request.user)
+
+    if request.method == "POST":
+        address.full_name = request.POST.get('full_name')
+        address.phone = request.POST.get('phone')
+        address.street = request.POST.get('street')
+        address.city = request.POST.get('city')
+        address.postal_code = request.POST.get('postal_code')
+        address.country = request.POST.get('country')
+
+        if 'is_default' in request.POST:
+            Address.objects.filter(user=request.user, is_default=True).exclude(id=address.id).update(is_default=False)
+            address.is_default = True
+        else:
+            address.is_default = False
+
+        address.save()
+        return redirect('personal_info')
+
+    return render(request, 'ghost/edit_address.html', {'address': address})
+
+
+def delete_address(request, address_id):
+    address = get_object_or_404(Address, id=address_id, user=request.user)
+    address.delete()
+    return redirect('personal_info')
+
+
+def account_security(request):
+    user = request.user
+    errors = []
+
+    old_password = user.password
+
+    if request.method == "POST":
+        new_password = request.POST.get('new_password')
+        repeat_password = request.POST.get('repeat_password')
+
+        if user.check_password(new_password):
+            errors.append("Your new password must be different from the old one.")
+
+        elif new_password != repeat_password:
+            errors.append("Your passwords don't match.")
+
+        elif len(new_password) < 8:
+            errors.append("Your password must have at least 8 characters.")
+
+        elif not re.search(r'\d', new_password):
+            errors.append("Password must contain at least one digit.")
+
+        elif not re.search(r'[A-Za-z]', new_password):
+            errors.append("Password must contain at least one Latin letter.")
+
+        elif not re.search(r'[!@#$%^&*,.?]', new_password):
+            errors.append("Password must contain at least one special character.")
+
+        else:
+            user.set_password(new_password)
+            user.save()
+            update_session_auth_hash(request, user)
+            return render(request, 'ghost/account_security.html', {'success': True})
+
+    return render(request, 'ghost/account_security.html', context={'errors': errors})
 
 
 def filtered_products(request, brand, category):
@@ -64,17 +160,12 @@ def filtered_products(request, brand, category):
             products_filtered.append(product)
             name_counts[name] = count + 1
 
-
     context = {
         'brand': brand_obj,
         'category': category_obj,
         'products': products_filtered[:12]
     }
     return render(request, 'ghost/products.html', context)
-
-
-
-
 
 
 def product_detail(request, pk):
@@ -101,7 +192,91 @@ def add_to_wishlist(request, product_id):
     WishlistItem.objects.get_or_create(user=request.user, product=product)
     return redirect(request.META.get('HTTP_REFERER', 'home'))
 
+
 @login_required
 def wishlist_view(request):
-    wishlist_items = WishlistItem.objects.filter(user=request.user).select_related('product')
+    wishlist_items_nike = WishlistItem.objects.filter(
+        user=request.user,
+        product__brand__name="Nike"
+    ).select_related('product')
+
+    wishlist_items_adidas = WishlistItem.objects.filter(
+        user=request.user,
+        product__brand__name="Adidas"
+    ).select_related('product')
+
+    wishlist_items_puma = WishlistItem.objects.filter(
+        user=request.user,
+        product__brand__name="Puma"
+    ).select_related('product')
+
+    wishlist_items = [wishlist_items_nike, wishlist_items_adidas, wishlist_items_puma]
+
     return render(request, 'ghost/wishlist.html', {'wishlist_items': wishlist_items})
+
+
+def delete_item_from_wishlist(request, product_id):
+    WishlistItem.objects.filter(user=request.user, product_id=product_id).delete()
+    return redirect('wishlist')
+
+
+@login_required
+def add_to_cart(request, variant_id):
+    variant = get_object_or_404(ProductVariant, id=variant_id)
+    cart_item, created = CartItem.objects.get_or_create(
+        user=request.user,
+        product_variant=variant,
+        defaults={'quantity': 1}
+    )
+    if not created:
+        cart_item.quantity += 1
+        cart_item.save()
+
+    return redirect('cart')
+
+
+@login_required
+def cart_view(request):
+    cart_items = CartItem.objects.filter(user=request.user).select_related('product_variant__product')
+
+    cart_items_nike = CartItem.objects.filter(
+        user=request.user,
+        product_variant__product__brand__name="Nike"
+    ).select_related('product_variant__product')
+
+    cart_items_adidas = CartItem.objects.filter(
+        user=request.user,
+        product_variant__product__brand__name="Adidas"
+    ).select_related('product_variant__product')
+
+    cart_items_puma = CartItem.objects.filter(
+        user=request.user,
+        product_variant__product__brand__name="Puma"
+    ).select_related('product_variant__product')
+
+    cart_item = [cart_items_nike, cart_items_adidas, cart_items_puma]
+    total = sum([item.total_price() for item in cart_items])
+
+    return render(request, 'ghost/cart.html', {
+        'cart_items': cart_item,
+        'total': total,
+    })
+
+
+@require_POST
+def update_cart_quantity(request, item_id):
+    new_quantity = int(request.POST.get('quantity', 1))
+    item = get_object_or_404(CartItem, id=item_id, user=request.user)
+
+    if new_quantity > 0:
+        item.quantity = new_quantity
+        item.save()
+    else:
+        item.delete()
+
+    return redirect('cart')
+
+
+def delete_item_from_cart(request, item_id):
+    CartItem.objects.filter(user=request.user, id=item_id).delete()
+    return redirect('cart')

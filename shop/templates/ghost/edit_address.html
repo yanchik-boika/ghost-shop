@@ -1,0 +1,19 @@
+{% extends 'ghost/base.html' %}
+{% block title %}Edit Address{% endblock %}
+{% block content %}
+<h2>Edit Address</h2>
+<form method="POST">
+  {% csrf_token %}
+  <div class="mb-2"><input type="text" name="full_name" value="{{ address.full_name }}" class="form-control" required></div>
+  <div class="mb-2"><input type="text" name="phone" value="{{ address.phone }}" class="form-control" required></div>
+  <div class="mb-2"><input type="text" name="street" value="{{ address.street }}" class="form-control" required></div>
+  <div class="mb-2"><input type="text" name="city" value="{{ address.city }}" class="form-control" required></div>
+  <div class="mb-2"><input type="text" name="postal_code" value="{{ address.postal_code }}" class="form-control" required></div>
+  <div class="mb-2"><input type="text" name="country" value="{{ address.country }}" class="form-control" required></div>
+  <div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" name="is_default" id="defaultCheck" {% if address.is_default %}checked{% endif %}>
+    <label class="form-check-label" for="defaultCheck">Set as default</label>
+  </div>
+  <button type="submit" class="btn btn-dark">Save Changes</button>
+</form>
+{% endblock %}

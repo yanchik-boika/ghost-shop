@@ -5,21 +5,27 @@
 {% block content %}
 
 <h2 class="mb-4">My Wishlist</h2>
-<div class="row">
-  {% for item in wishlist_items %}
-    <div class="col-md-4 mb-4">
-      <div class="card">
-        <img src="{{ item.product.main_image_url }}" class="card-img-top" alt="{{ item.product.name }}">
-        <div class="card-body">
-          <h5 class="card-title">{{ item.product.name }}</h5>
-          <p class="card-text">${{ item.product.price }}</p>
-          <a href="{% url 'product_detail' item.product.id %}" class="btn btn-outline-dark">View</a>
-        </div>
-      </div>
-    </div>
-  {% empty %}
-    <p>You have no items in your wishlist yet.</p>
-  {% endfor %}
 
+{% for brand_items in wishlist_items %}
+{% if brand_items %}
+<h4 class="mt-4">{{ brand_items.0.product.brand.name }}</h4>
+<div class="row">
+    {% for item in brand_items %}
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <img src="{{ item.product.main_image_url }}" class="card-img-top" alt="{{ item.product.name }}">
+            <div class="card-body">
+                <h5 class="card-title">{{ item.product.name }}</h5>
+                <p class="card-text">${{ item.product.price }}</p>
+                <a href="{% url 'product_detail' item.product.id %}" class="btn btn-outline-dark">View</a>
+                <a href="{% url 'delete_item_from_wishlist' item.product.id%}" class="btn btn-outline-dark">Delete</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p>You have no items in your wishlist yet.</p>
+    {% endfor %}
 </div>
+{% endif %}
+{% endfor %}
 {% endblock %}

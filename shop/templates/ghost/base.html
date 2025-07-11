@@ -7,18 +7,25 @@
     {% load static %}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/navigation_menu_styles.css' %}">
+    <style>
+        body {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            min-height: 100vh;
+        }
+    </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-light bg-light px-4">
 
-<!--    name of the shop-->
+    <!--    name of the shop-->
     <a class="navbar-brand fw-bold" href="{% url 'home' %}">Ghost Shop</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
     </button>
 
 
-<!--    Brands with gender-->
+    <!--    Brands with gender-->
     <div class="collapse navbar-collapse navigateKir" id="navbarNav">
         <ul class="navbar-nav">
             <li class="nav-item dropdown">
@@ -48,8 +55,10 @@
                     </svg>
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown2">
-                    <li><a class="dropdown-item" href="{% url 'filtered-products' brand='adidas' category='men' %}">Men</a></li>
-                    <li><a class="dropdown-item" href="{% url 'filtered-products' brand='adidas' category='women' %}">Women</a></li>
+                    <li><a class="dropdown-item"
+                           href="{% url 'filtered-products' brand='adidas' category='men' %}">Men</a></li>
+                    <li><a class="dropdown-item" href="{% url 'filtered-products' brand='adidas' category='women' %}">Women</a>
+                    </li>
                 </ul>
             </li>
 
@@ -64,8 +73,10 @@
                     </svg>
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown3">
-                    <li><a class="dropdown-item" href="{% url 'filtered-products' brand='puma' category='men' %}">Men</a></li>
-                    <li><a class="dropdown-item" href="{% url 'filtered-products' brand='puma' category='women' %}">Women</a></li>
+                    <li><a class="dropdown-item"
+                           href="{% url 'filtered-products' brand='puma' category='men' %}">Men</a></li>
+                    <li><a class="dropdown-item" href="{% url 'filtered-products' brand='puma' category='women' %}">Women</a>
+                    </li>
                 </ul>
             </li>
 
@@ -91,14 +102,16 @@
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
                 <li>
-                    <a class="dropdown-item d-flex justify-content-between align-items-center" href="#">
+                    <a class="dropdown-item d-flex justify-content-between align-items-center"
+                       href="{% url 'personal_info'%}">
                         Personal info
                         <img src="https://res.cloudinary.com/dzrhl5r1f/image/upload/v1751970523/profile_rafljm.svg"
                              alt="Profile" width="18" height="18">
                     </a>
                 </li>
                 <li>
-                    <a class="dropdown-item d-flex justify-content-between align-items-center" href="#">
+                    <a class="dropdown-item d-flex justify-content-between align-items-center"
+                       href="{% url 'account_security' %}">
                         Security
                         <img src="https://res.cloudinary.com/dzrhl5r1f/image/upload/v1751970523/security_czpivk.svg"
                              alt="Security" width="20" height="20">
@@ -123,7 +136,7 @@
         </div>
 
 
-        <a href="#" class="nav-icon">
+        <a href="{% url 'cart' %}" class="nav-icon">
             <img src="https://res.cloudinary.com/dzrhl5r1f/image/upload/v1751970523/cart_bvakcz.svg" alt="Cart"
                  width="24" height="24">
         </a>
@@ -150,7 +163,8 @@
                 </p>
                 <p class="mb-1"><a href="https://github.com/yanchik-boika" target="_blank" class="text-light">github.com/yanchik-boika</a>
                 </p>
-                <p class="mb-0"><a href="https://linkedin.com/in/frantsysk-yan-boika-599a66228" target="_blank" class="text-light">linkedin.com/in/frantsysk-boika</a>
+                <p class="mb-0"><a href="https://linkedin.com/in/frantsysk-yan-boika-599a66228" target="_blank"
+                                   class="text-light">linkedin.com/in/frantsysk-boika</a>
                 </p>
             </div>
         </div>

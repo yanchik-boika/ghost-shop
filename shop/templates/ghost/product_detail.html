@@ -7,7 +7,6 @@
 <div class="container py-5">
     <h2 class="text-center mb-4">{{ product.name }}</h2>
 
-
     <div class="row">
         <div class="col-md-6 text-center">
             <img id="mainImage" src="{{ product.main_image_url }}" class="img-fluid rounded mb-3"
@@ -34,34 +33,69 @@
             </div>
 
             <h5 class="text-center mb-3">Select Size (US):</h5>
-            <form method="POST" action="#">
-                {% csrf_token %}
-                <div class="row">
-                    {% for size in sizes %}
-                    <div class="col-4 mb-2">
-                        <button type="button" class="size-btn" onclick="selectSize(this)" data-size="{{ size }}">
-                            {{ size }}
-                        </button>
+            <div class="row">
+                {% for variant in product.variants.all %}
+                <div class="col-4 mb-2">
+                    <button type="button" class="size-btn w-100"
+                            onclick="selectVariant(this, {{ variant.id }})">
+                        {{ variant.size.label }}
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="d-flex justify-content-between mt-4 flex-wrap gap-2">
+                {% if user.is_authenticated %}
+                <div class="d-flex flex-column w-50">
+                    <div id="sizeWarning" class="text-danger mb-2" style="display: none;">
+                        Please select a size before adding to cart
                     </div>
-                    {% endfor %}
+
+                    <form id="cartForm" method="POST" action="#">
+                        {% csrf_token %}
+                        <input type="hidden" name="variant_id" id="variantIdInput">
+                        <button type="submit" class="btn btn-outline-black w-100">Add to Cart</button>
+                    </form>
                 </div>
 
-                <input type="hidden" name="selected_size" id="selectedSize">
-
-                <div class="d-flex justify-content-between mt-4">
-                    <button type="submit" class="btn btn-outline-black">Add to Cart</button>
-                    <button type="submit" class="btn btn-outline-black">Buy Now</button>
-                </div>
-            </form>
+                <form method="GET" action="#" class="w-50">
+                    <button type="submit" class="btn btn-outline-black w-100">Buy Now</button>
+                </form>
+                {% else %}
+                <a href="{% url 'login' %}?next={% url 'product_detail' product.id %}"
+                   class="btn btn-outline-black w-50 me-2">
+                    Add to Cart
+                </a>
+                <a href="{% url 'login' %}?next={% url 'product_detail' product.id %}"
+                   class="btn btn-outline-black w-50">
+                    Buy Now
+                </a>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    function selectSize(btn) {
-        document.getElementById('selectedSize').value = btn.dataset.size;
-        document.querySelectorAll('.size-btn').forEach(el => el.classList.remove('active'));
-        btn.classList.add('active');
+    let selectedVariantId = null;
+
+  function selectVariant(btn, variantId) {
+    selectedVariantId = variantId;
+
+    document.getElementById('variantIdInput').value = variantId;
+    document.getElementById('cartForm').action = `/cart/add/${variantId}/`;
+
+    document.querySelectorAll('.size-btn').forEach(el => el.classList.remove('active'));
+    btn.classList.add('active');
+
+    document.getElementById('sizeWarning').style.display = 'none';
+  }
+
+  document.getElementById('cartForm').addEventListener('submit', function (event) {
+    if (!selectedVariantId) {
+      event.preventDefault();
+      document.getElementById('sizeWarning').style.display = 'block';
     }
+  });
 </script>
 {% endblock %}

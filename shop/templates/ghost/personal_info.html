@@ -1,0 +1,49 @@
+{% extends 'ghost/base.html' %}
+{% block title %}My Account{% endblock %}
+{% block content %}
+<h2 class="mb-4">Personal Information</h2>
+
+<p><strong>Username:</strong> {{ user.username }}</p>
+<p><strong>Email:</strong> {{ user.email }}</p>
+
+<hr>
+<h4 class="mt-4">Shipping Addresses</h4>
+{% if addresses %}
+<ul class="list-group mb-4">
+    {% for address in addresses %}
+    <li class="list-group-item">
+        {{ address.full_name }} | {{ address.street }}, {{ address.city }} | {{ address.phone }}
+        {% if address.is_default %}<span class="badge bg-dark ms-2">Default</span>{% endif %}
+    </li>
+    <div class="mt-2">
+        <a href="{% url 'edit_address' address.id %}" class="btn btn-sm btn-outline-dark me-2">Edit</a>
+        <form method="POST" action="{% url 'delete_address' address.id %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+        </form>
+    </div>
+
+    {% endfor %}
+</ul>
+{% else %}
+<p>You have no saved addresses yet.</p>
+{% endif %}
+
+<hr>
+<h4 class="mt-4">Add New Address</h4>
+<form method="POST" action="{% url 'add_address' %}">
+    {% csrf_token %}
+    <div class="mb-2"><input type="text" name="full_name" class="form-control" placeholder="Full Name" required></div>
+    <div class="mb-2"><input type="text" name="phone" class="form-control" placeholder="Phone Number" required></div>
+    <div class="mb-2"><input type="text" name="street" class="form-control" placeholder="Street Address" required></div>
+    <div class="mb-2"><input type="text" name="city" class="form-control" placeholder="City" required></div>
+    <div class="mb-2"><input type="text" name="postal_code" class="form-control" placeholder="Postal Code" required>
+    </div>
+    <div class="mb-2"><input type="text" name="country" class="form-control" placeholder="Country" required></div>
+    <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" name="is_default" id="defaultCheck">
+        <label class="form-check-label" for="defaultCheck">Set as default</label>
+    </div>
+    <button type="submit" class="btn btn-dark">Save Address</button>
+</form>
+{% endblock %}
