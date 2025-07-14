@@ -1,0 +1,52 @@
+{% extends 'ghost/base.html' %}
+{% block title %}About Me{% endblock %}
+
+{% block content %}
+<style>
+    .link-black {
+        color: black;
+        text-decoration: underline;
+    }
+
+    .link-black:hover{
+        color: blue;
+        text-decoration: underline;
+    }
+</style>
+<div class="container mt-5 mb-5">
+    <h2 class="mb-4">About Me</h2>
+    <div class="card p-4 shadow-sm">
+        <p>
+            Hi, I'm <strong>Frantsysk</strong> — a dedicated and detail-oriented full-stack developer.
+            I have completed 3 years of <strong>Computer Science</strong> studies at a Polish university and I have 1
+            semester left
+        </p>
+        <p>
+            Over the past few years, I’ve immersed myself in backend development — particularly with Django. My work
+            reflects strong analytical thinking, a love for clean architecture, and a commitment to scalable solutions.
+        </p>
+        <p>
+            I have hands-on experience developing full-stack applications, integrating RESTful APIs, and working with
+            databases such as PostgreSQL, MySQL and MongoDB.
+        </p>
+        <p>
+            What sets me apart is my attention to detail, clean code, and constant desire to learn and grow. I’m not
+            afraid to take on new challenges and always aim to deliver high-quality, maintainable solutions.
+        </p>
+        <p>
+            I'm currently looking for exciting opportunities where I can contribute to real-world projects, collaborate
+            with experienced developers, and continue evolving as a software engineer.
+        </p>
+        <hr>
+        <p>
+            📫 <strong>Let’s connect:</strong><br>
+            Email: <a href="mailto:frantsysk.boika@gmail.com" class="link-black">frantsysk.boika@gmail.com</a><br>
+            GitHub: <a href="https://github.com/yanchik-boika" target="_blank"
+                       class="link-black">github.com/yanchik-boika</a><br>
+            LinkedIn: <a href="https://linkedin.com/in/frantsysk-yan-boika-599a66228" target="_blank"
+                         class="link-black">linkedin.com/in/frantsysk-boika</a>
+        </p>
+
+    </div>
+</div>
+{% endblock %}

@@ -40,6 +40,7 @@ urlpatterns = [
 
     path('order/confirmation/<int:order_id>/', views.order_confirmation, name='order_confirmation'),
 
+    path('about/', views.about, name='about'),
     path('<str:brand>/<str:category>/', views.filtered_products, name='filtered-products'),
 ]
 if settings.DEBUG:

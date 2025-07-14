@@ -459,3 +459,6 @@ def order_confirmation(request, order_id):
     return render(request, 'ghost/order_confirmation.html', {
         'order': order
     })
+
+def about(request):
+    return render(request, 'ghost/about.html')
