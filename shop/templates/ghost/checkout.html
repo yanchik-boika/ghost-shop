@@ -1,9 +1,9 @@
 {% extends 'ghost/base.html' %}
 {% block title %}Checkout{% endblock %}
-
+{% load static %}
 {% block content %}
 <h2 class="mb-4">Checkout</h2>
-
+<link rel="stylesheet" href="{% static 'css/checkout-styles.css' %}">
 <form method="POST" action="{% url 'place_order' %}">
     {% csrf_token %}
 
