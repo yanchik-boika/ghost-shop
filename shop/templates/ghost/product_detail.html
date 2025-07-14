@@ -44,32 +44,45 @@
                 {% endfor %}
             </div>
 
-            <div class="d-flex justify-content-between mt-4 flex-wrap gap-2">
-                {% if user.is_authenticated %}
-                <div class="d-flex flex-column w-50">
-                    <div id="sizeWarning" class="text-danger mb-2" style="display: none;">
-                        Please select a size before adding to cart
-                    </div>
 
-                    <form id="cartForm" method="POST" action="#">
-                        {% csrf_token %}
-                        <input type="hidden" name="variant_id" id="variantIdInput">
-                        <button type="submit" class="btn btn-outline-black w-100">Add to Cart</button>
-                    </form>
+            <div class="mt-4">
+                {% if user.is_authenticated %}
+
+                <div id="sizeWarning" class="text-danger mb-2" style="display: none;">
+                    Please select a size before adding to cart
+                </div>
+                <div id="size-warning-to-buy" class="text-danger mb-2" style="display: none;">
+                    Please select a size before buying
                 </div>
 
-                <form method="GET" action="#" class="w-50">
-                    <button type="submit" class="btn btn-outline-black w-100">Buy Now</button>
-                </form>
+                <div class="row mt-4">
+                    <div class="col-6">
+                        <form id="cartForm" method="POST" action="#">
+                            {% csrf_token %}
+                            <input type="hidden" name="variant_id" id="variantIdInput">
+                            <button type="submit" class="btn btn-outline-black w-100">Add to Cart</button>
+                        </form>
+                    </div>
+
+                    <div class="col-6">
+                        <form id="buyForm" method="POST" action="#">
+                            {% csrf_token %}
+                            <input type="hidden" name="variant_id" id="variantIdInputbuy">
+                            <button type="submit" class="btn btn-outline-black w-100">Buy Now</button>
+                        </form>
+                    </div>
+                </div>
                 {% else %}
-                <a href="{% url 'login' %}?next={% url 'product_detail' product.id %}"
-                   class="btn btn-outline-black w-50 me-2">
-                    Add to Cart
-                </a>
-                <a href="{% url 'login' %}?next={% url 'product_detail' product.id %}"
-                   class="btn btn-outline-black w-50">
-                    Buy Now
-                </a>
+                <div class="d-flex flex-row gap-2">
+                    <a href="{% url 'login' %}?next={% url 'product_detail' product.id %}"
+                       class="btn btn-outline-black w-50 me-2">
+                        Add to Cart
+                    </a>
+                    <a href="{% url 'login' %}?next={% url 'product_detail' product.id %}"
+                       class="btn btn-outline-black w-50">
+                        Buy Now
+                    </a>
+                </div>
                 {% endif %}
             </div>
         </div>
@@ -79,23 +92,35 @@
 <script>
     let selectedVariantId = null;
 
-  function selectVariant(btn, variantId) {
-    selectedVariantId = variantId;
+    function selectVariant(btn, variantId) {
+        selectedVariantId = variantId;
 
-    document.getElementById('variantIdInput').value = variantId;
-    document.getElementById('cartForm').action = `/cart/add/${variantId}/`;
+        document.getElementById('variantIdInput').value = variantId;
+        document.getElementById('variantIdInputbuy').value = variantId;
 
-    document.querySelectorAll('.size-btn').forEach(el => el.classList.remove('active'));
-    btn.classList.add('active');
 
-    document.getElementById('sizeWarning').style.display = 'none';
-  }
+        document.getElementById('cartForm').action = `/cart/add/${variantId}/`;
+        document.getElementById('buyForm').action = `/checkout/${variantId}/`;
 
-  document.getElementById('cartForm').addEventListener('submit', function (event) {
-    if (!selectedVariantId) {
-      event.preventDefault();
-      document.getElementById('sizeWarning').style.display = 'block';
+        document.querySelectorAll('.size-btn').forEach(el => el.classList.remove('active'));
+        btn.classList.add('active');
+
+        document.getElementById('sizeWarning').style.display = 'none';
+        document.getElementById('size-warning-to-buy').style.display = 'none';
     }
-  });
+
+    document.getElementById('cartForm').addEventListener('submit', function (event) {
+        if (!selectedVariantId) {
+            event.preventDefault();
+            document.getElementById('sizeWarning').style.display = 'block';
+        }
+    });
+
+    document.getElementById('buyForm').addEventListener('submit', function (event) {
+        if (!selectedVariantId) {
+            event.preventDefault();
+            document.getElementById('size-warning-to-buy').style.display = 'block';
+        }
+    });
 </script>
 {% endblock %}

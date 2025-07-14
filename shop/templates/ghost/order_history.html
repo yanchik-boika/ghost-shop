@@ -1,0 +1,36 @@
+{% extends 'ghost/base.html' %}
+{% block title %}My Orders{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Order History</h2>
+
+{% if orders %}
+  {% for order in orders %}
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between">
+        <strong>Order #{{ order.id }}</strong>
+        <span class="badge bg-secondary text-uppercase">{{ order.status }}</span>
+      </div>
+      <div class="card-body">
+        <p>
+          <strong>Placed:</strong> {{ order.created_at|date:"M d, Y" }}<br>
+          <strong>Total:</strong> ${{ order.total_price }}<br>
+          <strong>Discount:</strong> ${{ order.discount }}<br>
+          <strong>Final Total:</strong> ${{ order.total_price }} - ${{ order.discount }}
+        </p>
+
+        <ul class="list-group list-group-flush">
+          {% for item in order.items.all %}
+          <li class="list-group-item d-flex justify-content-between">
+            {{ item.product.name }} × {{ item.quantity }}
+            <span>${{ item.price }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  {% endfor %}
+{% else %}
+  <p>You haven’t placed any orders yet.</p>
+{% endif %}
+{% endblock %}

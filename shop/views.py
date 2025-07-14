@@ -1,3 +1,4 @@
+from decimal import Decimal
 from enum import unique
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
@@ -6,9 +7,10 @@ from django.shortcuts import render, get_object_or_404
 from django.db.models import Prefetch
 from .models import Brand, Category, Product, ProductVariant, ProductImage, WishlistItem
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login
 from django.views.decorators.http import require_POST
 from django.contrib.auth.forms import PasswordChangeForm
-from .models import CartItem, Address
+from .models import CartItem, Address, Order, OrderItem
 from django.contrib.auth import update_session_auth_hash
 import re
 
@@ -27,9 +29,6 @@ def register_view(request):
         form = RegisterForm()
 
     return render(request, 'ghost/register.html', {'form': form})
-
-
-from django.contrib.auth import authenticate, login
 
 
 def login_view(request):
@@ -280,3 +279,183 @@ def update_cart_quantity(request, item_id):
 def delete_item_from_cart(request, item_id):
     CartItem.objects.filter(user=request.user, id=item_id).delete()
     return redirect('cart')
+
+
+def checkout_single(request, variant_id):
+    variant = get_object_or_404(ProductVariant, id=variant_id)
+    product = variant.product
+    quantity = 1
+
+    checkout_items = [{
+        'product': product,
+        'variant': variant,
+        'quantity': quantity,
+        'total_price': product.price
+    }]
+
+    checkout_items_session = [{
+        'product_id': product.id,
+        'variant_id': variant.id,
+        'price': str(product.price),
+        'quantity': 1
+    }]
+
+    request.session['checkout_items'] = checkout_items_session
+
+    return render(request, 'ghost/checkout.html', {
+        'checkout_items': checkout_items,
+        'total_price': product.price,
+        'discount': 0,
+        'source': 'single',
+        'shipping_methods': Order._meta.get_field('shipping_method').choices,
+        'payment_methods': Order._meta.get_field('payment_method').choices,
+    })
+
+@require_POST
+def checkout_selected(request):
+    selected_ids = request.POST.getlist('selected_items')
+    cart_items = CartItem.objects.filter(id__in=selected_ids, user=request.user)
+
+    checkout_items = []
+    checkout_items_session = []
+    total_price = 0
+
+    for item in cart_items:
+        product = item.product_variant.product
+        variant = item.product_variant
+        quantity = item.quantity
+        total = quantity * product.price
+
+        checkout_items.append({
+            'product': product,
+            'variant': variant,
+            'quantity': quantity,
+            'total_price': total
+        })
+        checkout_items_session.append({
+            'product_id': product.id,
+            'variant_id': variant.id,
+            'price': str(product.price),
+            'quantity': quantity
+        })
+
+        total_price += total
+
+    request.session['checkout_items'] = checkout_items_session
+
+    return render(request, 'ghost/checkout.html', {
+        'checkout_items': checkout_items,
+        'total_price': total_price,
+        'discount': 0,
+        'source': 'cart',
+        'shipping_methods': Order._meta.get_field('shipping_method').choices,
+        'payment_methods': Order._meta.get_field('payment_method').choices,
+    })
+
+
+def checkout_all(request):
+    cart_items = CartItem.objects.filter(user=request.user)
+
+    checkout_items = []
+    checkout_items_session = []
+    total_price = 0
+
+    for item in cart_items:
+        product = item.product_variant.product
+        variant = item.product_variant
+        quantity = item.quantity
+        total = quantity * product.price
+
+        checkout_items.append({
+            'product': product,
+            'variant': variant,
+            'quantity': quantity,
+            'total_price': total
+        })
+
+        checkout_items_session.append({
+            'product_id': product.id,
+            'variant_id': variant.id,
+            'price': str(product.price),
+            'quantity': quantity
+        })
+
+        total_price += total
+
+    request.session['checkout_items'] = checkout_items_session
+
+    return render(request, 'ghost/checkout.html', {
+        'checkout_items': checkout_items,
+        'total_price': total_price,
+        'discount': 0,
+        'source': 'chart',
+        'shipping_methods': Order._meta.get_field('shipping_method').choices,
+        'payment_methods': Order._meta.get_field('payment_method').choices
+    })
+
+
+
+@require_POST
+def place_order(request):
+    address_id = request.POST.get('address_id')
+    shipping = request.POST.get('shipping_method')
+    payment = request.POST.get('payment_method')
+    promo = request.POST.get('promo_code', '').strip()
+
+    address = get_object_or_404(Address, id=address_id, user=request.user)
+    raw_items = request.session.get('checkout_items', [])
+
+    total_price = Decimal('0.00')
+    parsed_items = []
+
+    for entry in raw_items:
+        product = get_object_or_404(Product, id=entry['product_id'])
+        variant = get_object_or_404(ProductVariant, id=entry['variant_id'])
+        price = Decimal(entry['price'])
+        quantity = int(entry['quantity'])
+
+        parsed_items.append((product, variant, price, quantity))
+        total_price += price * quantity
+
+
+    discount = 0
+    if promo == 'asdf':
+        discount = 10
+
+    discount_amount = (total_price * Decimal(discount)) / Decimal('100')
+    final_total = total_price - discount_amount
+
+    order = Order.objects.create(
+        user=request.user,
+        address=address,
+        shipping_method=shipping,
+        payment_method=payment,
+        promo_code=promo or None,
+        discount=discount_amount,
+        total_price=final_total,
+        status='pending'
+    )
+
+    for product, variant, price, quantity in parsed_items:
+        OrderItem.objects.create(
+            order=order,
+            product=product,
+            quantity=quantity,
+            price=price
+        )
+
+    request.session['checkout_items'] = []
+
+    return redirect('order_confirmation', order_id=order.id)
+
+
+def order_history(request):
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'ghost/order_history.html', {'orders': orders})
+
+
+def order_confirmation(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    return render(request, 'ghost/order_confirmation.html', {
+        'order': order
+    })

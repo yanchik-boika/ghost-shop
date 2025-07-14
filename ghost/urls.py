@@ -20,7 +20,7 @@ urlpatterns = [
 
     path('account/edit-address/<int:address_id>', views.edit_address, name='edit_address'),
     path('account/delete-address/<int:address_id>', views.delete_address, name='delete_address'),
-
+    path('account/orders', views.order_history, name='order_history'),
     path('account/security', views.account_security, name='account_security'),
 
     path('product/<int:pk>/', views.product_detail, name='product_detail'),
@@ -30,12 +30,39 @@ urlpatterns = [
     path('wishlist/', views.wishlist_view, name='wishlist'),
 
     path('cart/add/<int:variant_id>/', views.add_to_cart, name='add_to_cart'),
-    path('cart/update/<int:item_id>/', views.update_cart_quantity, name='update_cart_quantity'),
     path('cart/delete/<int:item_id>/', views.delete_item_from_cart, name='delete_item_from_cart'),
     path('cart/', views.cart_view, name='cart'),
 
+    path('checkout/place/', views.place_order, name='place_order'),
+    path('checkout/<int:variant_id>/', views.checkout_single, name='checkout_single'),
+    path('checkout/selected/', views.checkout_selected, name='checkout_selected'),
+    path('checkout/all/', views.checkout_all, name='checkout_all'),
+
+    path('order/confirmation/<int:order_id>/', views.order_confirmation, name='order_confirmation'),
+
     path('<str:brand>/<str:category>/', views.filtered_products, name='filtered-products'),
 ]
-
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

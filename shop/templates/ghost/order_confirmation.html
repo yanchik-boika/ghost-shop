@@ -1,0 +1,50 @@
+{% extends 'ghost/base.html' %}
+{% block title %}Order Confirmation{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Thank you for your order!</h2>
+
+<div class="card">
+  <div class="card-header d-flex justify-content-between">
+    <strong>Order #{{ order.id }}</strong>
+    <span class="badge bg-secondary text-uppercase">{{ order.status }}</span>
+  </div>
+
+  <div class="card-body">
+    <p>
+      <strong>Placed on:</strong> {{ order.created_at|date:"F j, Y H:i" }}<br>
+      <strong>Shipping to:</strong>
+      {{ order.address.full_name }}, {{ order.address.street }},
+      {{ order.address.city }}, {{ order.address.country }}<br>
+      <strong>Shipping Method:</strong> {{ order.get_shipping_method_display }}<br>
+      <strong>Payment Method:</strong> {{ order.get_payment_method_display }}<br>
+      {% if order.promo_code %}
+        <strong>Promo Code:</strong> {{ order.promo_code }}<br>
+      {% endif %}
+    </p>
+
+    <h4 class="mt-4">Items:</h4>
+    <ul class="list-group mb-4">
+      {% for item in order.items.all %}
+      <li class="list-group-item d-flex justify-content-between">
+        <div>
+          {{ item.product.name }} × {{ item.quantity }}
+        </div>
+        <span>${{ item.price }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+
+    <h4 class="text-end">Subtotal: ${{ order.total_price|add:order.discount }}</h4>
+    {% if order.discount > 0 %}
+      <h5 class="text-end text-success">Discount: -${{ order.discount }}</h5>
+    {% endif %}
+    <h4 class="text-end">Total Paid: ${{ order.total_price }}</h4>
+  </div>
+</div>
+
+<div class="text-end mt-4">
+  <a href="{% url 'order_history' %}" class="btn btn-outline-dark">View My Orders</a>
+  <a href="{% url 'home' %}" class="btn btn-dark">Continue Shopping</a>
+</div>
+{% endblock %}
