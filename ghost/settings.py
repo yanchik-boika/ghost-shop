@@ -8,7 +8,7 @@ SECRET_KEY = "django-insecure-h%4$x$1k*=o3smhb$h5(h%%!4v3k&=kvmdg#6bms3w&dnd6fxk
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'ghost-shop.onrender.com']
 
 INSTALLED_APPS = [
     "django.contrib.admin",
